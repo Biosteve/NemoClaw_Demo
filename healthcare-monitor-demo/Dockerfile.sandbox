@@ -1,0 +1,26 @@
+ARG SANDBOX_BASE=ghcr.io/nvidia/nemoclaw/sandbox-base:latest
+FROM ${SANDBOX_BASE}
+
+ARG NEMOCLAW_MODEL=nvidia/nvidia/nemotron-3-super-v3
+ENV HEALTHCARE_AGENT_MODEL=inference/${NEMOCLAW_MODEL}
+
+USER root
+
+WORKDIR /opt/healthcare-monitor-agentic-claw
+
+COPY docker/install-openclaw-assets.py ./docker/install-openclaw-assets.py
+COPY openclaw.json ./openclaw.json
+COPY TOOLS.md ./TOOLS.md
+COPY policy.yaml ./policy.yaml
+COPY workspaces/ ./workspaces/
+COPY skills/ ./skills/
+COPY data/ ./data/
+COPY workspace/scripts/ ./workspace/scripts/
+COPY openclaw-cron/jobs.json ./openclaw-cron/jobs.json
+
+# Let the base image create/repair its stock OpenClaw config first, then merge
+# the project-specific multi-agent topology without replacing provider settings.
+RUN openclaw doctor --fix || true
+RUN python3 ./docker/install-openclaw-assets.py
+
+WORKDIR /opt/nemoclaw
