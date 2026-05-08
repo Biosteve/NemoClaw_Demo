@@ -1,0 +1,8 @@
+.env
+*.tgz
+__pycache__/
+*.pyc
+demo-app/state/
+outputs/
+tmp/
+
